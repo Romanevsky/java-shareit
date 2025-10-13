@@ -9,9 +9,10 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class ItemDto {
-    private long id;
+public class ItemUpdateDto {
+    private Long id;
+    private Long ownerId;
     private String name;
     private String description;
-    private boolean available;
+    private Boolean available;
 }

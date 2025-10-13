@@ -1,4 +1,4 @@
-package ru.practicum.shareit.item.dto;
+package ru.practicum.shareit.user.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,9 +9,8 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class ItemDto {
-    private long id;
+public class UserDto {
+    private Long id;
     private String name;
-    private String description;
-    private boolean available;
+    private String email;
 }
