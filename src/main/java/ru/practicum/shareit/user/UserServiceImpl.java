@@ -1,8 +1,8 @@
 package ru.practicum.shareit.user;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.exception.AlreadyExistException;
 import ru.practicum.shareit.user.dto.UserCreateDto;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.dto.UserUpdateDto;
@@ -13,29 +13,43 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    @Autowired
     private final UserRepository userRepository;
-    @Autowired
     private final UserMapper userMapper;
 
     @Override
     public UserDto createUser(UserCreateDto userCreateDto) {
-        return userMapper.toUserDto(userRepository.createUser(userMapper.toUser(userCreateDto)));
+        try {
+            User user = userRepository.createUser(userMapper.toUser(userCreateDto));
+            return userMapper.toUserDto(user);
+        } catch (AlreadyExistException e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     @Override
     public UserDto updateUser(UserUpdateDto userUpdateDto, Long userId) {
-        return userMapper.toUserDto(userRepository.updateUser(userMapper.toUser(userUpdateDto), userId));
+        try {
+            User updatedUser = userRepository.updateUser(userMapper.toUser(userUpdateDto), userId);
+            return userMapper.toUserDto(updatedUser);
+        } catch (RuntimeException e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     @Override
     public List<UserDto> getAllUsers() {
-        return userRepository.getAllUsers().stream().map(userMapper::toUserDto).toList();
+        return userRepository.getAllUsers().stream()
+                .map(userMapper::toUserDto)
+                .toList();
     }
 
     @Override
     public UserDto getUser(Long userId) {
-        return userMapper.toUserDto(userRepository.getUser(userId));
+        User user = userRepository.getUser(userId);
+        if (user == null) {
+            throw new RuntimeException("Пользователь с id " + userId + " не найден");
+        }
+        return userMapper.toUserDto(user);
     }
 
     @Override
@@ -43,3 +57,4 @@ public class UserServiceImpl implements UserService {
         userRepository.deleteUser(userId);
     }
 }
+

@@ -10,7 +10,7 @@ import java.util.List;
 public class UserRepositoryImpl implements UserRepository {
 
     private long userCounter = 1;
-    private HashMap<Long, User> userStorage;
+    private final HashMap<Long, User> userStorage = new HashMap<>();
 
     @Override
     public User createUser(User user) {
@@ -54,9 +54,10 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     public void emailValidation(String email) {
-        if (userStorage.values().stream()
-                .anyMatch(storageUser -> storageUser.getEmail().equals(email))) {
-            throw new AlreadyExistException("Такой email уже существует");
+        for (User user : userStorage.values()) {
+            if (user.getEmail().equals(email)) {
+                throw new AlreadyExistException("Такой email уже существует");
+            }
         }
     }
 }
