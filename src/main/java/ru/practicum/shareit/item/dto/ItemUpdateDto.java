@@ -8,7 +8,6 @@ import lombok.ToString;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
 public class ItemUpdateDto {
     private Long id;
     private Long ownerId;

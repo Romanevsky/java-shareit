@@ -13,7 +13,6 @@ import ru.practicum.shareit.item.dto.ItemUpdateDto;
 import java.util.List;
 
 @Slf4j
-@Validated
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/items")

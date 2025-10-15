@@ -1,18 +1,16 @@
 package ru.practicum.shareit.user;
 
-import lombok.Data;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exception.AlreadyExistException;
 
 import java.util.HashMap;
 import java.util.List;
 
-@Data
 @Repository
 public class UserRepositoryImpl implements UserRepository {
 
     private long userCounter = 1;
-    private final HashMap<Long, User> userStorage;
+    private HashMap<Long, User> userStorage;
 
     @Override
     public User createUser(User user) {

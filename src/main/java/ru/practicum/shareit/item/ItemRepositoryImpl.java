@@ -62,7 +62,7 @@ public class ItemRepositoryImpl implements ItemRepository {
         }
         List<Item> nameSearchItems = itemStorage.values()
                 .stream()
-                .filter(item -> item.getName().toLowerCase().contains(text.toLowerCase()))
+                .filter(item -> item.getName().toLowerCase().contains(text))
                 .filter(item -> item.getAvailable())
                 .toList();
         List<Item> descriptionSearchItems = itemStorage.values()
