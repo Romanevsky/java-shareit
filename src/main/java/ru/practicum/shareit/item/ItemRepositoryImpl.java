@@ -61,18 +61,24 @@ public class ItemRepositoryImpl implements ItemRepository {
             return List.of();
         }
 
+        String lowerText = text.toLowerCase();
+
         List<Item> nameSearchItems = itemStorage.values()
                 .stream()
-                .filter(item -> item.getName().toLowerCase().contains(text.toLowerCase()))
+                .filter(item -> item.getName().toLowerCase().contains(lowerText))
+                .filter(Item::getAvailable)
                 .toList();
 
         List<Item> descriptionSearchItems = itemStorage.values()
                 .stream()
-                .filter(item -> item.getDescription().toLowerCase().contains(text.toLowerCase()))
+                .filter(item -> item.getDescription().toLowerCase().contains(lowerText))
+                .filter(Item::getAvailable)
                 .toList();
 
         return Stream.concat(nameSearchItems.stream(), descriptionSearchItems.stream())
                 .distinct()
                 .collect(Collectors.toList());
     }
+
+
 }
