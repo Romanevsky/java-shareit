@@ -60,16 +60,17 @@ public class ItemRepositoryImpl implements ItemRepository {
         if (text.isBlank()) {
             return List.of();
         }
+
         List<Item> nameSearchItems = itemStorage.values()
                 .stream()
-                .filter(item -> item.getName().toLowerCase().contains(text))
-                .filter(item -> item.getAvailable())
+                .filter(item -> item.getName().toLowerCase().contains(text.toLowerCase()))
                 .toList();
+
         List<Item> descriptionSearchItems = itemStorage.values()
                 .stream()
                 .filter(item -> item.getDescription().toLowerCase().contains(text.toLowerCase()))
-                .filter(item -> item.getAvailable())
                 .toList();
+
         return Stream.concat(nameSearchItems.stream(), descriptionSearchItems.stream())
                 .distinct()
                 .collect(Collectors.toList());
