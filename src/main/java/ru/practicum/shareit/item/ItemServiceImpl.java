@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.exception.DataIsNotAvailableException;
@@ -46,13 +47,15 @@ public class ItemServiceImpl implements ItemService {
     private final CommentMapper commentMapper;
 
     @Override
+    @Transactional
     public ItemDto save(ItemCreateDto itemCreateDto) {
         User user = userRepository.findById(itemCreateDto.getOwnerId())
-                        .orElseThrow(() -> new DataNotFoundException("Такого пользователя нет в базе"));
+                .orElseThrow(() -> new DataNotFoundException("Такого пользователя нет в базе"));
         return itemMapper.toItemDto(itemRepository.save(itemMapper.toItem(itemCreateDto, user)));
     }
 
     @Override
+    @Transactional
     public ItemDto updateItem(ItemUpdateDto itemUpdateDto) {
         User user = userRepository.findById(itemUpdateDto.getOwnerId())
                 .orElseThrow(() -> new DataNotFoundException("Такого пользователя нет в базе"));
@@ -74,6 +77,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ItemInfoDto getItem(Long itemId, Long userId) {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new DataNotFoundException("Такой вещи нет в базе"));
@@ -87,6 +91,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ItemInfoDto> getUserItems(Long ownerId) {
         User user = userRepository.findById(ownerId)
                 .orElseThrow(() -> new DataNotFoundException("Такого пользователя нет в базе"));
@@ -100,6 +105,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ItemDto> getSearchItems(String text) {
         if (text.isBlank()) {
             return List.of();
@@ -108,6 +114,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional
     public CommentDto saveComment(CommentCreateDto commentCreateDto) {
         List<Booking> booking = bookingRepository
                 .findByItemIdAndBookerId(commentCreateDto.getItemId(), commentCreateDto.getAuthorId())
