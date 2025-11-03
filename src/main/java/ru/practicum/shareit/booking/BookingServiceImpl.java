@@ -3,6 +3,7 @@ package ru.practicum.shareit.booking;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingCreateDto;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.exception.IsNotAvailableException;
@@ -29,8 +30,8 @@ public class BookingServiceImpl implements BookingService {
     @Autowired
     private final BookingMapper bookingMapper;
 
-
     @Override
+    @Transactional
     public BookingDto save(BookingCreateDto bookingCreateDto) {
         Item item = itemRepository.findById(bookingCreateDto.getItemId())
                 .orElseThrow(() -> new NotFoundException("Такой вещи нет в базе"));
@@ -45,6 +46,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    @Transactional
     public BookingDto itemOwnerBookingDecision(Long ownerId, Boolean approved, Long bookingId) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new NotFoundException("Такого бронировния нет в базе"));
