@@ -5,8 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingCreateDto;
 import ru.practicum.shareit.booking.dto.BookingDto;
-import ru.practicum.shareit.exception.DataIsNotAvailableException;
-import ru.practicum.shareit.exception.DataNotFoundException;
+import ru.practicum.shareit.exception.IsNotAvailableException;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.User;
@@ -33,11 +33,11 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public BookingDto save(BookingCreateDto bookingCreateDto) {
         Item item = itemRepository.findById(bookingCreateDto.getItemId())
-                .orElseThrow(() -> new DataNotFoundException("Такой вещи нет в базе"));
+                .orElseThrow(() -> new NotFoundException("Такой вещи нет в базе"));
         User booker = userRepository.findById(bookingCreateDto.getBookerId())
-                .orElseThrow(() -> new DataNotFoundException("Такого пользователя нет в базе"));
+                .orElseThrow(() -> new NotFoundException("Такого пользователя нет в базе"));
         if (!item.getAvailable()) {
-            throw new DataIsNotAvailableException("Данная вещь недоступна");
+            throw new IsNotAvailableException("Данная вещь недоступна");
         }
         Booking booking = bookingMapper.toBooking(bookingCreateDto, item, booker);
         booking.setStatus(Status.WAITING);
@@ -47,9 +47,9 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public BookingDto itemOwnerBookingDecision(Long ownerId, Boolean approved, Long bookingId) {
         Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new DataNotFoundException("Такого бронировния нет в базе"));
+                .orElseThrow(() -> new NotFoundException("Такого бронировния нет в базе"));
         if (booking.getItem().getOwner().getId() != ownerId) {
-            throw new DataIsNotAvailableException("Изменить статус бронирования может только владелец вещи");
+            throw new IsNotAvailableException("Изменить статус бронирования может только владелец вещи");
         }
         booking.setStatus(approved ? Status.APPROVED : Status.REJECTED);
         return bookingMapper.toBookingDto(bookingRepository.save(booking));
@@ -58,7 +58,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public BookingDto findById(Long userId, Long bookingId) {
         Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new DataNotFoundException("Такого бронирования нет в базе"));
+                .orElseThrow(() -> new NotFoundException("Такого бронирования нет в базе"));
         if (booking.getItem().getOwner().getId() == userId || booking.getBooker().getId() == userId) {
             return bookingMapper.toBookingDto(booking);
         }
@@ -79,7 +79,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public List<BookingDto> findOwnerItemsBookings(Long ownerId, State state) {
         if (itemRepository.findByOwnerId(ownerId).isEmpty()) {
-            throw new DataNotFoundException("У этого пользователя нет вещей");
+            throw new NotFoundException("У этого пользователя нет вещей");
         }
         List<Booking> bookingList = bookingRepository.findByItemOwnerId(ownerId)
                 .stream()
