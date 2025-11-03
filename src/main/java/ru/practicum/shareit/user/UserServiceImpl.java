@@ -1,8 +1,8 @@
 package ru.practicum.shareit.user;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.dto.UserCreateDto;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -12,11 +12,10 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class UserServiceImpl implements UserService {
 
-    @Autowired
     private final UserRepository userRepository;
-    @Autowired
     private final UserMapper userMapper;
 
     @Override
@@ -34,16 +33,17 @@ public class UserServiceImpl implements UserService {
         if (userUpdateDto.getEmail() != null) {
             user.setEmail(userUpdateDto.getEmail());
         }
-        userRepository.save(user);
-        return userMapper.toUserDto(user);
+        return userMapper.toUserDto(userRepository.save(user));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<UserDto> getAllUsers() {
         return userRepository.findAll().stream().map(userMapper::toUserDto).toList();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserDto getUser(Long userId) {
         return userMapper.toUserDto(userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Такого пользователя не существует.")));
