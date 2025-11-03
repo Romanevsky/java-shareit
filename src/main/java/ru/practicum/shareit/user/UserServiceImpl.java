@@ -3,7 +3,6 @@ package ru.practicum.shareit.user;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.DataNotFoundException;
 import ru.practicum.shareit.user.dto.UserCreateDto;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -21,13 +20,11 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
 
     @Override
-    @Transactional
     public UserDto save(UserCreateDto userCreateDto) {
         return userMapper.toUserDto(userRepository.save(userMapper.toUser(userCreateDto)));
     }
 
     @Override
-    @Transactional
     public UserDto updateUser(UserUpdateDto userUpdateDto, Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new DataNotFoundException("Пользователь не найден"));
@@ -42,20 +39,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<UserDto> getAllUsers() {
         return userRepository.findAll().stream().map(userMapper::toUserDto).toList();
     }
 
     @Override
-    @Transactional(readOnly = true)
     public UserDto getUser(Long userId) {
         return userMapper.toUserDto(userRepository.findById(userId)
                 .orElseThrow(() -> new DataNotFoundException("Такого пользователя не существует.")));
     }
 
     @Override
-    @Transactional
     public void deleteUser(Long userId) {
         userRepository.deleteById(userId);
     }
