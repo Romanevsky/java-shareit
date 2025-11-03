@@ -25,7 +25,7 @@ public class BookingCreateDto {
     private Long bookerId;
 
     @AssertTrue
-    boolean isStartBeforeEnd() {
+    public boolean isStartBeforeEnd() {
         return start.isBefore(end);
     }
 }
