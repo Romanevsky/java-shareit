@@ -3,8 +3,8 @@ package ru.practicum.shareit.item;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.exception.IsNotAvailableException;
@@ -27,16 +27,22 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class ItemServiceImpl implements ItemService {
 
     private static final Logger log = LoggerFactory.getLogger(ItemServiceImpl.class);
+    @Autowired
     private final ItemRepository itemRepository;
+    @Autowired
     private final ItemMapper itemMapper;
+    @Autowired
     private final UserRepository userRepository;
+    @Autowired
     private final UserMapper userMapper;
+    @Autowired
     private final BookingRepository bookingRepository;
+    @Autowired
     private final CommentRepository commentRepository;
+    @Autowired
     private final CommentMapper commentMapper;
 
     @Override
@@ -53,7 +59,7 @@ public class ItemServiceImpl implements ItemService {
         Item item = itemRepository.findById(itemUpdateDto.getId())
                 .orElseThrow(() -> new NotFoundException("Такой вещи нет в базе"));
         if (item.getOwner().getId() != itemUpdateDto.getOwnerId()) {
-            throw new NotFoundException("Изменить запись вещи может только её владелец");
+            throw new NotFoundException("Изменить запись вещи  может только её владелец");
         }
         if (itemUpdateDto.getName() != null) {
             item.setName(itemUpdateDto.getName());
@@ -68,7 +74,6 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public ItemInfoDto getItem(Long itemId, Long userId) {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Такой вещи нет в базе"));
@@ -82,9 +87,8 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<ItemInfoDto> getUserItems(Long ownerId) {
-        userRepository.findById(ownerId)
+        User user = userRepository.findById(ownerId)
                 .orElseThrow(() -> new NotFoundException("Такого пользователя нет в базе"));
         List<Item> itemList = itemRepository.findByOwnerId(ownerId);
         List<Booking> bookingList = bookingRepository.findByItemOwnerId(ownerId);
@@ -96,7 +100,6 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<ItemDto> getSearchItems(String text) {
         if (text.isBlank()) {
             return List.of();
@@ -109,7 +112,9 @@ public class ItemServiceImpl implements ItemService {
         List<Booking> booking = bookingRepository
                 .findByItemIdAndBookerId(commentCreateDto.getItemId(), commentCreateDto.getAuthorId())
                 .stream()
-                .sorted(Comparator.comparing(Booking::getEnd).reversed())
+                .sorted(Comparator
+                        .comparing(Booking::getEnd)
+                        .reversed())
                 .filter(b -> b.getEnd().isBefore(LocalDateTime.now()))
                 .toList();
         if (booking.isEmpty()) {
@@ -124,16 +129,20 @@ public class ItemServiceImpl implements ItemService {
         return commentMapper.toCommentDto(commentRepository.save(comment));
     }
 
-    @Transactional(readOnly = true)
     public ItemInfoDto prepareItemInfo(Item item, List<Booking> bookingList) {
-        Optional<Booking> latestBooking = bookingList.stream()
+        Optional<Booking> latestBooking = bookingList
+                .stream()
                 .filter(b -> b.getItem().getId() == item.getId())
-                .sorted(Comparator.comparing(Booking::getEnd).reversed())
+                .sorted(Comparator
+                        .comparing(Booking::getEnd)
+                        .reversed())
                 .filter(b -> b.getEnd().isBefore(LocalDateTime.now()))
                 .findFirst();
-        Optional<Booking> closestBooking = bookingList.stream()
+        Optional<Booking> closestBooking = bookingList
+                .stream()
                 .filter(b -> b.getItem().getId() == item.getId())
-                .sorted(Comparator.comparing(Booking::getStart))
+                .sorted(Comparator
+                        .comparing(Booking::getStart))
                 .filter(b -> b.getStart().isAfter(LocalDateTime.now()))
                 .findFirst();
         List<CommentDto> comments = commentRepository.findByItemId(item.getId())
@@ -141,8 +150,8 @@ public class ItemServiceImpl implements ItemService {
                 .map(commentMapper::toCommentDto)
                 .toList();
         return itemMapper.toItemForInfoDto(item,
-                latestBooking.orElse(null),
-                closestBooking.orElse(null),
+                latestBooking.orElse(new Booking()),
+                closestBooking.orElse(new Booking()),
                 comments);
     }
 }

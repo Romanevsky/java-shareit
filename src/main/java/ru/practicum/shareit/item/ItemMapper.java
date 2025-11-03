@@ -16,6 +16,7 @@ import ru.practicum.shareit.user.User;
 import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
+@Slf4j
 @Component
 public class ItemMapper {
 

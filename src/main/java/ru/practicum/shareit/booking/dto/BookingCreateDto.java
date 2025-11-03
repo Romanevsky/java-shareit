@@ -22,7 +22,7 @@ public class BookingCreateDto {
     @NotNull
     @Future
     private LocalDateTime end;
-    public Long bookerId;
+    private Long bookerId;
 
     @AssertTrue
     boolean isStartBeforeEnd() {

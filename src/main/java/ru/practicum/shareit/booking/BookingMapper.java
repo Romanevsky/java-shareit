@@ -11,6 +11,7 @@ import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.dto.UserBookerDto;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
+@Slf4j
 @Component
 public class BookingMapper {
     public Booking toBooking(BookingCreateDto bookingCreateDto, Item item, User booker) {
