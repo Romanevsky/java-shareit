@@ -1,8 +1,9 @@
+// ... импорты без изменений ...
 package ru.practicum.shareit.booking;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingCreateDto;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.exception.DataIsNotAvailableException;
@@ -20,17 +21,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BookingServiceImpl implements BookingService {
 
-    @Autowired
     private final BookingRepository bookingRepository;
-    @Autowired
     private final ItemRepository itemRepository;
-    @Autowired
     private final UserRepository userRepository;
-    @Autowired
     private final BookingMapper bookingMapper;
 
-
     @Override
+    @Transactional
     public BookingDto save(BookingCreateDto bookingCreateDto) {
         Item item = itemRepository.findById(bookingCreateDto.getItemId())
                 .orElseThrow(() -> new DataNotFoundException("Такой вещи нет в базе"));
@@ -45,6 +42,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    @Transactional
     public BookingDto itemOwnerBookingDecision(Long ownerId, Boolean approved, Long bookingId) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new DataNotFoundException("Такого бронировния нет в базе"));
