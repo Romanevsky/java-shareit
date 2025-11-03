@@ -7,9 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ItemDto {
+public class ItemBookingDto {
     private long id;
     private String name;
-    private String description;
-    private boolean available;
 }
