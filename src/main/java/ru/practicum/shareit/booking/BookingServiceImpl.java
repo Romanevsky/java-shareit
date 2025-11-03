@@ -1,7 +1,6 @@
 package ru.practicum.shareit.booking;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingCreateDto;
@@ -19,19 +18,15 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class BookingServiceImpl implements BookingService {
 
-    @Autowired
     private final BookingRepository bookingRepository;
-    @Autowired
     private final ItemRepository itemRepository;
-    @Autowired
     private final UserRepository userRepository;
-    @Autowired
     private final BookingMapper bookingMapper;
 
     @Override
-    @Transactional
     public BookingDto save(BookingCreateDto bookingCreateDto) {
         Item item = itemRepository.findById(bookingCreateDto.getItemId())
                 .orElseThrow(() -> new NotFoundException("Такой вещи нет в базе"));
@@ -46,10 +41,9 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    @Transactional
     public BookingDto itemOwnerBookingDecision(Long ownerId, Boolean approved, Long bookingId) {
         Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new NotFoundException("Такого бронировния нет в базе"));
+                .orElseThrow(() -> new NotFoundException("Такого бронирования нет в базе"));
         if (booking.getItem().getOwner().getId() != ownerId) {
             throw new IsNotAvailableException("Изменить статус бронирования может только владелец вещи");
         }
@@ -58,6 +52,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public BookingDto findById(Long userId, Long bookingId) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new NotFoundException("Такого бронирования нет в базе"));
@@ -68,54 +63,48 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<BookingDto> findUserBookings(Long bookerId, State state) {
         List<Booking> bookingList = bookingRepository.findByBookerId(bookerId)
                 .stream()
-                .sorted(Comparator
-                        .comparing(Booking::getStart)
-                        .reversed())
+                .sorted(Comparator.comparing(Booking::getStart).reversed())
                 .toList();
         return stateFilter(bookingList, state).stream().map(bookingMapper::toBookingDto).toList();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<BookingDto> findOwnerItemsBookings(Long ownerId, State state) {
         if (itemRepository.findByOwnerId(ownerId).isEmpty()) {
             throw new NotFoundException("У этого пользователя нет вещей");
         }
         List<Booking> bookingList = bookingRepository.findByItemOwnerId(ownerId)
                 .stream()
-                .sorted(Comparator
-                        .comparing(Booking::getStart)
-                        .reversed())
+                .sorted(Comparator.comparing(Booking::getStart).reversed())
                 .toList();
         return stateFilter(bookingList, state).stream().map(bookingMapper::toBookingDto).toList();
     }
 
+    @Transactional(readOnly = true)
     public List<Booking> stateFilter(List<Booking> bookingList, State state) {
-        switch (state) {
-            case State.CURRENT -> bookingList = bookingList
-                    .stream()
+        return switch (state) {
+            case CURRENT -> bookingList.stream()
                     .filter(b -> b.getStart().isBefore(LocalDateTime.now()))
                     .filter(b -> b.getEnd().isAfter(LocalDateTime.now()))
                     .toList();
-            case State.PAST -> bookingList = bookingList
-                    .stream()
+            case PAST -> bookingList.stream()
                     .filter(b -> b.getEnd().isBefore(LocalDateTime.now()))
                     .toList();
-            case State.FUTURE -> bookingList = bookingList
-                    .stream()
+            case FUTURE -> bookingList.stream()
                     .filter(b -> b.getStart().isAfter(LocalDateTime.now()))
                     .toList();
-            case State.WAITING -> bookingList = bookingList
-                    .stream()
-                    .filter(b -> b.getStatus().equals(Status.WAITING))
+            case WAITING -> bookingList.stream()
+                    .filter(b -> b.getStatus() == Status.WAITING)
                     .toList();
-            case State.REJECTED -> bookingList = bookingList
-                    .stream()
-                    .filter(b -> b.getStatus().equals(Status.REJECTED))
+            case REJECTED -> bookingList.stream()
+                    .filter(b -> b.getStatus() == Status.REJECTED)
                     .toList();
-        }
-        return bookingList;
+            default -> throw new IllegalStateException("Unexpected value: " + state);
+        };
     }
 }
