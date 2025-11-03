@@ -25,7 +25,7 @@ public class UserController {
     @PostMapping
     public UserDto createUser(@Valid @RequestBody UserCreateDto userCreateDto) {
         log.info("Start creating user: {}", userCreateDto);
-        UserDto user = userService.createUser(userCreateDto);
+        UserDto user = userService.save(userCreateDto);
         log.info("Finish creating user: {}", user);
         return user;
     }

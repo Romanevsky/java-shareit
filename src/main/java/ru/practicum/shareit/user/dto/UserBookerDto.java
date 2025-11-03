@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserUpdateDto {
-    private String name;
-    private String email;
+public class UserBookerDto {
+    private Long id;
 }
