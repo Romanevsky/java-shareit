@@ -11,6 +11,8 @@ import ru.practicum.shareit.item.comment.CommentCreateDto;
 import ru.practicum.shareit.item.dto.ItemCreateDto;
 import ru.practicum.shareit.item.dto.ItemUpdateDto;
 
+import java.util.Collections;
+
 @Slf4j
 @Validated
 @RequiredArgsConstructor
@@ -50,8 +52,13 @@ public class ItemController {
 
     @GetMapping("/search")
     public ResponseEntity<Object> getSearchItems(@RequestParam("text") String text) {
-        log.info("Start getting items with words {}}", text);
-        return itemClient.searchItems(text);
+        log.info("Start getting items with words {}", text);
+
+        if (text == null || text.trim().isEmpty()) {
+            return ResponseEntity.ok(Collections.emptyList());
+        }
+
+        return itemClient.searchItems(text.trim());
     }
 
     @PostMapping("/{itemId}/comment")
